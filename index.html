@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPS App</title>
-    <link rel="icon" href="img/MnbIcon.png" type="img/png" sizes="180x180">
+    <link rel="icon" href="img/MnbIcon.png" type="image/png" sizes="180x180">
     <link rel="apple-touch-icon" href="img/MnbIcon.png">
 
     <style>
-        /* 基本のスタイル設定 */
+        /* --- 基本のスタイル設定 --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #222;
@@ -49,7 +49,7 @@
             margin-top: 30px;
             max-width: 90%;
             height: auto;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* シャドウを追加 */
         }
 
         #controls {
@@ -64,8 +64,11 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 10px;
+            width: 100%; /* ボタン幅を100%にしてレスポンシブ対応 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
@@ -86,9 +89,10 @@
             text-align: center;
             padding: 5px;
             background-color: #111;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* スマホ向けのレスポンシブデザイン */
+        /* --- スマホ向けレスポンシブデザイン --- */
         @media (max-width: 768px) {
             #canvas {
                 width: 100%;
@@ -100,23 +104,99 @@
             }
 
             button {
-                width: 100%;
                 padding: 12px;
                 font-size: 18px;
+                margin: 5px 0;
             }
+        }
+
+        /* --- 設定モーダルのスタイル --- */
+        #settingsModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 300px;
+            height: auto;
+            background: #333;
+            border-radius: 8px;
+            z-index: 1000;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .close {
+            font-size: 24px;
+            color: #fff;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .close:hover {
+            color: red;
+        }
+
+        #settingsModal:focus {
+            outline: none;
+        }
+
+        #settingsModal:focus-visible {
+            outline: 2px solid #fff;
         }
     </style>
 </head>
 <body>
     <header>
-        <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumi ロゴ">
+        <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ">
         <h1>IPSアプリケーション</h1>
     </header>
 
     <canvas id="canvas" width="800" height="400"></canvas>
     <div id="controls">
-        <button onclick="startSerial()" aria-label="シリアル通信開始">シリアル通信開始</button>
-        <button onclick="startBluetooth()" aria-label="Bluetooth通信開始">Bluetooth通信開始</button>
+        <button onclick="startSerial()">シリアル通信開始</button>
+        <button onclick="startBluetooth()">Bluetooth通信開始</button>
+        <button onclick="startCalibration()">キャリブレーション</button>
+        <button onclick="openSettings()">設定</button>
+    </div>
+
+    <!-- --- 設定モーダル --- -->
+    <div id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettings(event)">&times;</span>
+            <h2>設定</h2>
+            <label for="product">製品:</label>
+            <select id="product" onchange="updateApplication()">
+                <option value="IPS2550">IPS（IPS2550）</option>
+                <option value="RAA2P3500">VIR（RAA2P3500）</option>
+            </select><br><br>
+            
+            <label for="device">デバイス:</label>
+            <select id="device">
+                <option value="iPhone">iPhone</option>
+                <option value="iPad">iPad</option>
+                <option value="Android">Android</option>
+                <option value="Windows">Windows</option>
+            </select><br><br>
+            
+            <label for="connection">接続:</label>
+            <select id="connection">
+                <option value="wired">有線（有線）</option>
+                <option value="wifi">無線（Wi-Fi）</option>
+                <option value="bluetooth">無線（Bluetooth）</option>
+            </select><br><br>
+            
+            <button onclick="importSettings()">設定インポート</button>
+            <br><br>
+            <button onclick="closeSettings(event)">完了</button>
+        </div>
     </div>
 
     <footer>
@@ -124,32 +204,51 @@
     </footer>
 
     <script>
-        // キャンバスとグラフ描画の初期設定
+        // --- キャンバスの設定 ---
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let maxDataPoints = 100; // 最大データポイント数
-        let A_vals = Array(maxDataPoints).fill(0);
-        let B_vals = Array(maxDataPoints).fill(0);
-        let xSpacing = canvas.width / maxDataPoints; // 横幅に合わせた間隔
+        let maxDataPoints = 100;  // データポイント数
+        let A_vals = Array(maxDataPoints).fill(0);  // Aデータの初期化
+        let B_vals = Array(maxDataPoints).fill(0);  // Bデータの初期化
+        let xSpacing = canvas.width / maxDataPoints;  // X軸の間隔
 
+        // --- 通信関連の設定 ---
         let serialPort = null;
         let bluetoothDevice = null;
         let bluetoothCharacteristic = null;
 
-        // 画面リサイズ時にキャンバスサイズを調整
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function resizeCanvas() {
-            // キャンバスの幅と高さをウィンドウに合わせて調整
-            canvas.width = window.innerWidth * 0.9; // 画面幅の90%
-            canvas.height = window.innerHeight * 0.5; // 画面高さの50%
-
-            // リサイズ後に xSpacing を再計算
-            xSpacing = canvas.width / maxDataPoints; // キャンバスの新しい幅に合わせた間隔
+        // --- 設定モーダルの表示処理 ---
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = "block";
+            document.body.style.overflow = "hidden";  // モーダル表示中はスクロール不可
         }
 
-        // シリアル通信を開始する関数
+        // --- 設定モーダルの閉じる処理 ---
+        function closeSettings(event) {
+            if (event) event.stopPropagation();  // イベントバブリングを防止
+            document.getElementById('settingsModal').style.display = "none";
+            document.body.style.overflow = "auto";  // スクロール可能に戻す
+        }
+
+        // --- 設定インポートの処理 ---
+        function importSettings() {
+            alert('設定ファイルをインポートしました。');
+        }
+
+        // --- ウィンドウリサイズ時のキャンバスサイズ変更処理 ---
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 100);  // 100msのディレイを設けて処理
+        });
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * 0.9;  // ウィンドウ幅の90%に設定
+            canvas.height = window.innerHeight * 0.5;  // ウィンドウ高さの50%に設定
+            xSpacing = canvas.width / maxDataPoints;  // X軸の間隔を再計算
+        }
+
+        // --- シリアル通信の開始処理 ---
         function startSerial() {
             if (navigator.serial) {
                 navigator.serial.requestPort().then(port => {
@@ -157,82 +256,83 @@
                     return serialPort.open({ baudRate: 115200 });
                 }).then(() => {
                     const reader = serialPort.readable.getReader();
-                    readLoop(reader); // データ読み取り開始
+                    readLoop(reader);  // データ読み取り開始
                 }).catch(error => {
+                    alert(`シリアルポートの接続に失敗しました: ${error.message}`);
                     console.error("シリアルポートの接続に失敗しました", error);
                 });
             } else {
-                alert("シリアル通信をサポートしていません。");
+                alert("シリアル通信はこのブラウザではサポートされていません。");
             }
         }
 
-        // Bluetooth通信を開始する関数
+        // --- Bluetooth通信の開始処理 ---
         async function startBluetooth() {
             try {
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: ['your_service_uuid'] }]
+                    filters: [{ services: ['your_service_uuid'] }]  // サービスUUIDの指定
                 });
                 const server = await bluetoothDevice.gatt.connect();
                 const service = await server.getPrimaryService('your_service_uuid');
                 bluetoothCharacteristic = await service.getCharacteristic('your_characteristic_uuid');
-                readBluetoothData(); // Bluetoothデータの読み取り開始
+                readBluetoothData();  // Bluetoothデータの読み取り開始
             } catch (error) {
+                alert("Bluetooth接続に失敗しました");
                 console.error("Bluetooth接続に失敗しました", error);
             }
         }
 
-        // シリアルデータの読み取りループ
+        // --- シリアルデータの読み取り処理 ---
         async function readLoop(reader) {
             const decoder = new TextDecoder();
             let buffer = "";
-            
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 buffer += decoder.decode(value, { stream: true });
                 let newLineIndex;
-                
-                // 改行を基にデータ処理
                 while ((newLineIndex = buffer.indexOf('\n')) >= 0) {
                     const line = buffer.slice(0, newLineIndex);
                     buffer = buffer.slice(newLineIndex + 1);
-                    processData(line); // データ処理
+                    processData(line);  // データ処理
                 }
             }
         }
 
-        // Bluetoothデータの読み取り
+        // --- Bluetoothデータの読み取り処理 ---
         async function readBluetoothData() {
             while (bluetoothCharacteristic) {
                 const value = await bluetoothCharacteristic.readValue();
                 const data = new TextDecoder().decode(value);
-                processData(data); // データ処理
+                processData(data);  // データ処理
             }
         }
 
-        // 受信したデータを解析してグラフに反映
+        // --- データの処理とグラフの更新 ---
         function processData(data) {
             const match = data.match(/A:(\d+).*B:(\d+)/);
             if (match) {
                 const A_val = parseInt(match[1]);
                 const B_val = parseInt(match[2]);
-                updateGraph(A_val, B_val); // グラフ更新
+                updateGraph(A_val, B_val);  // グラフ更新
+            } else {
+                console.warn("無効なデータ形式:", data);
             }
         }
 
-        // グラフを更新する関数
+        // --- グラフの描画処理 ---
         function updateGraph(A_val, B_val) {
             A_vals.shift();
             B_vals.shift();
             A_vals.push(A_val);
             B_vals.push(B_val);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
             ctx.font = '16px Arial';
             ctx.fillStyle = '#fff';
-            ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);
+            ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
 
+            // Y軸とX軸の目盛り描画
             ctx.beginPath();
             ctx.moveTo(0, canvas.height);
             ctx.lineTo(canvas.width, canvas.height);
@@ -248,7 +348,6 @@
                 ctx.fillText(label, 5, yPos);
             }
 
-            // グラフのグリッド線
             for (let i = 1; i <= 11; i++) {
                 ctx.beginPath();
                 ctx.moveTo(0, (canvas.height / 11) * i);
@@ -257,7 +356,6 @@
                 ctx.stroke();
             }
 
-            // X軸の目盛り
             for (let i = 0; i <= 10; i++) {
                 let xPos = (canvas.width / 10) * i;
                 ctx.fillText(i, xPos, canvas.height - 5);
@@ -271,7 +369,7 @@
                 ctx.stroke();
             }
 
-            // Aのグラフ描画
+            // Aデータの描画
             ctx.beginPath();
             for (let i = 0; i < A_vals.length; i++) {
                 const x = i * xSpacing;
@@ -283,7 +381,7 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Bのグラフ描画
+            // Bデータの描画
             ctx.beginPath();
             for (let i = 0; i < B_vals.length; i++) {
                 const x = i * xSpacing;
