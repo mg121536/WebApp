@@ -169,30 +169,30 @@
 
     <!-- --- 設定モーダル --- -->
     <div id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation();"> <!-- 親要素のクリックイベントの伝播を止める -->
             <span class="close" onclick="closeSettings(event)">&times;</span>
             <h2>設定</h2>
             <label for="product">製品:</label>
-            <select id="product" onchange="updateApplication()">
+            <select id="product" onchange="updateApplication()" onclick="event.stopPropagation();">
                 <option value="IPS2550">IPS（IPS2550）</option>
                 <option value="RAA2P3500">VIR（RAA2P3500）</option>
             </select><br><br>
-            
+    
             <label for="device">デバイス:</label>
-            <select id="device">
+            <select id="device" onclick="event.stopPropagation();">
                 <option value="iPhone">iPhone</option>
                 <option value="iPad">iPad</option>
                 <option value="Android">Android</option>
                 <option value="Windows">Windows</option>
             </select><br><br>
-            
+    
             <label for="connection">接続:</label>
-            <select id="connection">
+            <select id="connection" onclick="event.stopPropagation();">
                 <option value="wired">有線（有線）</option>
                 <option value="wifi">無線（Wi-Fi）</option>
                 <option value="bluetooth">無線（Bluetooth）</option>
             </select><br><br>
-            
+    
             <button onclick="importSettings()">設定インポート</button>
             <br><br>
             <button onclick="closeSettings(event)">完了</button>
@@ -220,14 +220,12 @@
         // --- 設定モーダルの表示処理 ---
         function openSettings() {
             document.getElementById('settingsModal').style.display = "block";
-            document.body.style.overflow = "hidden";  // モーダル表示中はスクロール不可
         }
 
         // --- 設定モーダルの閉じる処理 ---
         function closeSettings(event) {
             if (event) event.stopPropagation();  // イベントバブリングを防止
             document.getElementById('settingsModal').style.display = "none";
-            document.body.style.overflow = "auto";  // スクロール可能に戻す
         }
 
         // --- 設定インポートの処理 ---
