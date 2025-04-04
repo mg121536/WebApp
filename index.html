@@ -265,14 +265,19 @@
         }
 
         // --- Bluetooth通信の開始処理 ---
+        // UUIDなしで接続
         async function startBluetooth() {
             try {
+                // acceptAllDevices: trueを指定してすべてのデバイスを表示
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: ['your_service_uuid'] }]  // サービスUUIDの指定
+                    acceptAllDevices: true,  // すべてのBluetoothデバイスを表示
+                    optionalServices: ['battery_service']  // 任意のサービスUUIDを指定（例: バッテリーサービス）
                 });
+
                 const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService('your_service_uuid');
-                bluetoothCharacteristic = await service.getCharacteristic('your_characteristic_uuid');
+                const service = await server.getPrimaryService('battery_service');  // 任意のサービスUUIDを指定
+                bluetoothCharacteristic = await service.getCharacteristic('battery_level');  // 任意のキャラクタリスティックUUID
+
                 readBluetoothData();  // Bluetoothデータの読み取り開始
             } catch (error) {
                 alert("Bluetooth接続に失敗しました");
