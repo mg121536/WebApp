@@ -264,7 +264,114 @@
             }
         }
 
-        // --- Bluetooth通信の開始処理 ---
+// --- Bluetooth通信の開始処理 ---
+async function startBluetooth() {
+    try {
+        // acceptAllDevices: trueを指定してすべてのデバイスを表示
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,  // すべてのBluetoothデバイスを表示
+            optionalServices: ['12345678-1234-5678-1234-56789abcdef0']  // 角度データ用のサービスUUID
+        });
+
+        const server = await bluetoothDevice.gatt.connect();
+        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
+        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');  // 角度データ用のキャラクタリスティックUUID
+
+        bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);  // 通知イベントをリスン
+        await bluetoothCharacteristic.startNotifications();  // 通知を開始
+
+        console.log("Bluetooth接続成功");
+
+    } catch (error) {
+        alert("Bluetooth接続に失敗しました");
+        console.error("Bluetooth接続に失敗しました", error);
+    }
+}
+// --- Bluetoothデータの受信処理 ---
+function handleCharacteristicValueChanged(event) {
+    const value = event.target.value;
+    const angleA = value.getInt16(0, true);  // 角度Aのデータを取得
+    const angleB = value.getInt16(2, true);  // 角度Bのデータを取得
+
+    console.log("受信した角度データ A:", angleA, "B:", angleB);
+
+    updateGraph(angleA, angleB);  // グラフの更新
+}
+
+// --- グラフの更新処理 ---
+function updateGraph(A_val, B_val) {
+    A_vals.shift();
+    B_vals.shift();
+    A_vals.push(A_val);
+    B_vals.push(B_val);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
+
+    // Y軸とX軸の目盛り描画
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, canvas.height);
+    ctx.strokeStyle = '#fff';
+    ctx.stroke();
+
+    ctx.font = '10px Arial';
+    for (let i = 0; i <= 11; i++) {
+        let yPos = (canvas.height / 11) * i;
+        let label = 1100 - (i * 100);
+        ctx.fillText(label, 5, yPos);
+    }
+
+    for (let i = 1; i <= 11; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, (canvas.height / 11) * i);
+        ctx.lineTo(canvas.width, (canvas.height / 11) * i);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.stroke();
+    }
+
+    for (let i = 0; i <= 10; i++) {
+        let xPos = (canvas.width / 10) * i;
+        ctx.fillText(i, xPos, canvas.height - 5);
+    }
+
+    for (let i = 1; i <= 10; i++) {
+        ctx.beginPath();
+        ctx.moveTo((canvas.width / 10) * i, 0);
+        ctx.lineTo((canvas.width / 10) * i, canvas.height);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.stroke();
+    }
+
+    // Aデータの描画
+    ctx.beginPath();
+    for (let i = 0; i < A_vals.length; i++) {
+        const x = i * xSpacing;
+        const y = canvas.height - (A_vals[i] / 1100) * canvas.height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Bデータの描画
+    ctx.beginPath();
+    for (let i = 0; i < B_vals.length; i++) {
+        const x = i * xSpacing;
+        const y = canvas.height - (B_vals[i] / 1100) * canvas.height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+/*
         // UUIDなしで接続
         async function startBluetooth() {
             try {
@@ -284,6 +391,7 @@
                 console.error("Bluetooth接続に失敗しました", error);
             }
         }
+*/
 
         // --- シリアルデータの読み取り処理 ---
         async function readLoop(reader) {
