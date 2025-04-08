@@ -49,7 +49,7 @@
             margin-top: 30px;
             max-width: 90%;
             height: auto;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* シャドウを追加 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         #controls {
@@ -67,7 +67,7 @@
             border-radius: 8px;
             transition: all 0.3s ease;
             margin: 10px;
-            width: 100%; /* ボタン幅を100%にしてレスポンシブ対応 */
+            width: 100%; 
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -92,7 +92,6 @@
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- スマホ向けレスポンシブデザイン --- */
         @media (max-width: 768px) {
             #canvas {
                 width: 100%;
@@ -110,7 +109,6 @@
             }
         }
 
-        /* --- 設定モーダルのスタイル --- */
         #settingsModal {
             display: none;
             position: fixed;
@@ -144,13 +142,6 @@
             color: red;
         }
 
-        #settingsModal:focus {
-            outline: none;
-        }
-
-        #settingsModal:focus-visible {
-            outline: 2px solid #fff;
-        }
     </style>
 </head>
 <body>
@@ -163,23 +154,22 @@
     <div id="controls">
         <button onclick="startSerial()">シリアル通信開始</button>
         <button onclick="startBluetooth()">Bluetooth通信開始</button>
-        <button onclick="startCalibration()">キャリブレーション</button>
         <button onclick="openSettings()">設定</button>
     </div>
 
-    <!-- --- 設定モーダル --- -->
+    <!-- 設定モーダル -->
     <div id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
-        <div class="modal-content" onclick="event.stopPropagation();"> <!-- 親要素のクリックイベントの伝播を止める -->
+        <div class="modal-content" onclick="event.stopPropagation();">
             <span class="close" onclick="closeSettings(event)">&times;</span>
             <h2>設定</h2>
             <label for="product">製品:</label>
-            <select id="product" onchange="updateApplication()" onclick="event.stopPropagation();">
+            <select id="product">
                 <option value="IPS2550">IPS（IPS2550）</option>
                 <option value="RAA2P3500">VIR（RAA2P3500）</option>
             </select><br><br>
     
             <label for="device">デバイス:</label>
-            <select id="device" onclick="event.stopPropagation();">
+            <select id="device">
                 <option value="iPhone">iPhone</option>
                 <option value="iPad">iPad</option>
                 <option value="Android">Android</option>
@@ -187,7 +177,7 @@
             </select><br><br>
     
             <label for="connection">接続:</label>
-            <select id="connection" onclick="event.stopPropagation();">
+            <select id="connection">
                 <option value="wired">有線（有線）</option>
                 <option value="wifi">無線（Wi-Fi）</option>
                 <option value="bluetooth">無線（Bluetooth）</option>
@@ -204,49 +194,38 @@
     </footer>
 
     <script>
-        // --- キャンバスの設定 ---
+        // キャンバス設定
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let maxDataPoints = 100;  // データポイント数
-        let A_vals = Array(maxDataPoints).fill(0);  // Aデータの初期化
-        let B_vals = Array(maxDataPoints).fill(0);  // Bデータの初期化
-        let xSpacing = canvas.width / maxDataPoints;  // X軸の間隔
+        let maxDataPoints = 100;
+        let A_vals = Array(maxDataPoints).fill(0);
+        let B_vals = Array(maxDataPoints).fill(0);
+        let xSpacing = canvas.width / maxDataPoints;
 
-        // --- 通信関連の設定 ---
+        // シリアルポート
         let serialPort = null;
+
+        // Bluetooth
         let bluetoothDevice = null;
         let bluetoothCharacteristic = null;
 
-        // --- 設定モーダルの表示処理 ---
+        // 設定モーダル表示
         function openSettings() {
             document.getElementById('settingsModal').style.display = "block";
         }
 
-        // --- 設定モーダルの閉じる処理 ---
+        // 設定モーダル閉じる
         function closeSettings(event) {
-            if (event) event.stopPropagation();  // イベントバブリングを防止
+            if (event) event.stopPropagation();
             document.getElementById('settingsModal').style.display = "none";
         }
 
-        // --- 設定インポートの処理 ---
+        // 設定インポート
         function importSettings() {
             alert('設定ファイルをインポートしました。');
         }
 
-        // --- ウィンドウリサイズ時のキャンバスサイズ変更処理 ---
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(resizeCanvas, 100);  // 100msのディレイを設けて処理
-        });
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth * 0.9;  // ウィンドウ幅の90%に設定
-            canvas.height = window.innerHeight * 0.5;  // ウィンドウ高さの50%に設定
-            xSpacing = canvas.width / maxDataPoints;  // X軸の間隔を再計算
-        }
-
-        // --- シリアル通信の開始処理 ---
+        // シリアル通信開始
         function startSerial() {
             if (navigator.serial) {
                 navigator.serial.requestPort().then(port => {
@@ -254,197 +233,53 @@
                     return serialPort.open({ baudRate: 115200 });
                 }).then(() => {
                     const reader = serialPort.readable.getReader();
-                    readLoop(reader);  // データ読み取り開始
+                    readLoop(reader);
                 }).catch(error => {
                     alert(`シリアルポートの接続に失敗しました: ${error.message}`);
-                    console.error("シリアルポートの接続に失敗しました", error);
                 });
             } else {
                 alert("シリアル通信はこのブラウザではサポートされていません。");
             }
         }
 
-// --- Bluetooth通信の開始処理 ---
-async function startBluetooth() {
-    try {
-        // acceptAllDevices: trueを指定してすべてのデバイスを表示
-        bluetoothDevice = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true   // 全てのデバイスではなく特定のデバイスを選択
-            //filters: [{ name: 'ESP32_BLE_Device' }],
-            //optionalServices: ['12345678-1234-5678-1234-56789abcdef0']
-        });
-
-        const server = await bluetoothDevice.gatt.connect();
-        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
-        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');  // 角度データ用のキャラクタリスティックUUID
-
-        bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);  // 通知イベントをリスン
-        await bluetoothCharacteristic.startNotifications();  // 通知を開始
-
-        console.log("Bluetooth接続成功");
-
-    } catch (error) {
-        alert("Bluetooth接続に失敗しました");
-        console.error("Bluetooth接続に失敗しました", error);
-    }
-}
-// --- Bluetoothデータの受信処理 ---
-function handleCharacteristicValueChanged(event) {
-    const value = event.target.value;
-    const angleA = value.getInt16(0, true);  // 角度Aのデータを取得
-    const angleB = value.getInt16(2, true);  // 角度Bのデータを取得
-
-    console.log("受信した角度データ A:", angleA, "B:", angleB);
-
-    updateGraph(angleA, angleB);  // グラフの更新
-}
-
-// --- グラフの更新処理 ---
-function updateGraph(A_val, B_val) {
-    A_vals.shift();
-    B_vals.shift();
-    A_vals.push(A_val);
-    B_vals.push(B_val);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#fff';
-    ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
-
-    // Y軸とX軸の目盛り描画
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, canvas.height);
-    ctx.strokeStyle = '#fff';
-    ctx.stroke();
-
-    ctx.font = '10px Arial';
-    for (let i = 0; i <= 11; i++) {
-        let yPos = (canvas.height / 11) * i;
-        let label = 1100 - (i * 100);
-        ctx.fillText(label, 5, yPos);
-    }
-
-    for (let i = 1; i <= 11; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, (canvas.height / 11) * i);
-        ctx.lineTo(canvas.width, (canvas.height / 11) * i);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.stroke();
-    }
-
-    for (let i = 0; i <= 10; i++) {
-        let xPos = (canvas.width / 10) * i;
-        ctx.fillText(i, xPos, canvas.height - 5);
-    }
-
-    for (let i = 1; i <= 10; i++) {
-        ctx.beginPath();
-        ctx.moveTo((canvas.width / 10) * i, 0);
-        ctx.lineTo((canvas.width / 10) * i, canvas.height);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.stroke();
-    }
-
-    // Aデータの描画
-    ctx.beginPath();
-    for (let i = 0; i < A_vals.length; i++) {
-        const x = i * xSpacing;
-        const y = canvas.height - (A_vals[i] / 1100) * canvas.height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'blue';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Bデータの描画
-    ctx.beginPath();
-    for (let i = 0; i < B_vals.length; i++) {
-        const x = i * xSpacing;
-        const y = canvas.height - (B_vals[i] / 1100) * canvas.height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-}
-/*
-        // UUIDなしで接続
+        // Bluetooth通信開始
         async function startBluetooth() {
             try {
-                // acceptAllDevices: trueを指定してすべてのデバイスを表示
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,  // すべてのBluetoothデバイスを表示
-                    optionalServices: ['battery_service']  // 任意のサービスUUIDを指定（例: バッテリーサービス）
+                    acceptAllDevices: true
                 });
 
                 const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService('battery_service');  // 任意のサービスUUIDを指定
-                bluetoothCharacteristic = await service.getCharacteristic('battery_level');  // 任意のキャラクタリスティックUUID
-
-                readBluetoothData();  // Bluetoothデータの読み取り開始
+                const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');
+                bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');
+                bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+                await bluetoothCharacteristic.startNotifications();
+                console.log("Bluetooth接続成功");
             } catch (error) {
                 alert("Bluetooth接続に失敗しました");
-                console.error("Bluetooth接続に失敗しました", error);
-            }
-        }
-*/
-
-        // --- シリアルデータの読み取り処理 ---
-        async function readLoop(reader) {
-            const decoder = new TextDecoder();
-            let buffer = "";
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                let newLineIndex;
-                while ((newLineIndex = buffer.indexOf('\n')) >= 0) {
-                    const line = buffer.slice(0, newLineIndex);
-                    buffer = buffer.slice(newLineIndex + 1);
-                    processData(line);  // データ処理
-                }
             }
         }
 
-        // --- Bluetoothデータの読み取り処理 ---
-        async function readBluetoothData() {
-            while (bluetoothCharacteristic) {
-                const value = await bluetoothCharacteristic.readValue();
-                const data = new TextDecoder().decode(value);
-                processData(data);  // データ処理
-            }
+        // Bluetoothデータ受信
+        function handleCharacteristicValueChanged(event) {
+            const value = event.target.value;
+            const angleA = value.getInt16(0, true);
+            const angleB = value.getInt16(2, true);
+            updateGraph(angleA, angleB);
         }
 
-        // --- データの処理とグラフの更新 ---
-        function processData(data) {
-            const match = data.match(/A:(\d+).*B:(\d+)/);
-            if (match) {
-                const A_val = parseInt(match[1]);
-                const B_val = parseInt(match[2]);
-                updateGraph(A_val, B_val);  // グラフ更新
-            } else {
-                console.warn("無効なデータ形式:", data);
-            }
-        }
-
-        // --- グラフの描画処理 ---
+        // グラフ更新
         function updateGraph(A_val, B_val) {
             A_vals.shift();
             B_vals.shift();
             A_vals.push(A_val);
             B_vals.push(B_val);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.font = '16px Arial';
             ctx.fillStyle = '#fff';
-            ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
+            ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);
 
-            // Y軸とX軸の目盛り描画
             ctx.beginPath();
             ctx.moveTo(0, canvas.height);
             ctx.lineTo(canvas.width, canvas.height);
@@ -481,7 +316,6 @@ function updateGraph(A_val, B_val) {
                 ctx.stroke();
             }
 
-            // Aデータの描画
             ctx.beginPath();
             for (let i = 0; i < A_vals.length; i++) {
                 const x = i * xSpacing;
@@ -493,7 +327,6 @@ function updateGraph(A_val, B_val) {
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Bデータの描画
             ctx.beginPath();
             for (let i = 0; i < B_vals.length; i++) {
                 const x = i * xSpacing;
