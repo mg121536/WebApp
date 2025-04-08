@@ -270,7 +270,7 @@ async function startBluetooth() {
         // acceptAllDevices: trueを指定してすべてのデバイスを表示
         bluetoothDevice = await navigator.bluetooth.requestDevice({
             acceptAllDevices: false,  // 全てのデバイスではなく特定のデバイスを選択
-            filters: [{ name: 'Your_Device_Name' }],  // 必要に応じてデバイス名を指定
+            filters: [{ name: 'ESP32_BLE_Device' }],
             optionalServices: ['12345678-1234-5678-1234-56789abcdef0']
         });
 
