@@ -257,6 +257,7 @@
                 console.log("Bluetooth接続成功");
             } catch (error) {
                 alert("Bluetooth接続に失敗しました");
+                console.error("Bluetooth接続に失敗しました", error);  // エラー詳細を表示
             }
         }
 
