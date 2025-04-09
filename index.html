@@ -267,11 +267,69 @@
 // --- Bluetooth通信の開始処理 ---
 async function startBluetooth() {
     try {
-        // acceptAllDevices: trueを指定してすべてのデバイスを表示
-        bluetoothDevice = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,  // すべてのBluetoothデバイスを表示
-            optionalServices: ['12345678-1234-5678-1234-56789abcdef0']  // 角度データ用のサービスUUID
+        console.log("Bluetoothデバイスの選択を開始します...");
+        const bluetoothDevice = await navigator.bluetooth.requestDevice({
+            filters: [
+                { name: 'ESP32_BLE_Device' },  // デバイス名でフィルタリング
+                { services: ['12345678-1234-5678-1234-56789abcdef0'] }  // サービスUUIDでフィルタリング
+            ]
         });
+
+        console.log("選択したデバイス:", bluetoothDevice);
+
+        const server = await bluetoothDevice.gatt.connect();
+        console.log("GATTサーバーに接続:", server);
+
+        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
+        console.log("サービス取得:", service);
+
+        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');  // 角度データ用のキャラクタリスティックUUID
+        console.log("キャラクタリスティック取得:", bluetoothCharacteristic);
+
+        // 通知イベントのリスンと設定
+        bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+        console.log("通知リスナーを設定");
+
+        // 通知を開始
+        const startNotificationsResponse = await bluetoothCharacteristic.startNotifications();  
+        console.log("通知開始:", startNotificationsResponse);
+
+        console.log("Bluetooth接続成功");
+
+    } catch (error) {
+        alert("Bluetooth接続に失敗しました");
+        console.error("Bluetooth接続に失敗しました", error);
+    }
+}
+
+
+// 通知を受け取ったときに呼ばれる関数
+function handleCharacteristicValueChanged(event) {
+    console.log("通知イベントが発生しました。");
+    const characteristic = event.target;
+
+    if (!characteristic.value) {
+        console.error("通知データが空です");
+        return;
+    }
+
+    const value = new TextDecoder().decode(characteristic.value);
+    console.log("受け取ったデータ:", value);
+
+    document.getElementById('angleDisplay').innerText = `角度: ${value}°`;
+}
+
+
+/*
+async function startBluetooth() {
+    try {
+            // acceptAllDevices: trueを指定してすべてのデバイスを表示
+            const bluetoothDevice = await navigator.bluetooth.requestDevice({
+                filters: [
+                    { name: 'ESP32_BLE_Device' },  // デバイス名でフィルタリング
+                    { services: ['12345678-1234-5678-1234-56789abcdef0'] }  // サービスUUIDでフィルタリング
+                ]
+            });
 
         const server = await bluetoothDevice.gatt.connect();
         const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
@@ -287,6 +345,8 @@ async function startBluetooth() {
         console.error("Bluetooth接続に失敗しました", error);
     }
 }
+*/
+
 // --- Bluetoothデータの受信処理 ---
 function handleCharacteristicValueChanged(event) {
     const value = event.target.value;
@@ -371,27 +431,6 @@ function updateGraph(A_val, B_val) {
     ctx.lineWidth = 2;
     ctx.stroke();
 }
-/*
-        // UUIDなしで接続
-        async function startBluetooth() {
-            try {
-                // acceptAllDevices: trueを指定してすべてのデバイスを表示
-                bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,  // すべてのBluetoothデバイスを表示
-                    optionalServices: ['battery_service']  // 任意のサービスUUIDを指定（例: バッテリーサービス）
-                });
-
-                const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService('battery_service');  // 任意のサービスUUIDを指定
-                bluetoothCharacteristic = await service.getCharacteristic('battery_level');  // 任意のキャラクタリスティックUUID
-
-                readBluetoothData();  // Bluetoothデータの読み取り開始
-            } catch (error) {
-                alert("Bluetooth接続に失敗しました");
-                console.error("Bluetooth接続に失敗しました", error);
-            }
-        }
-*/
 
         // --- シリアルデータの読み取り処理 ---
         async function readLoop(reader) {
