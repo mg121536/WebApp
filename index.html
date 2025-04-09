@@ -275,24 +275,31 @@ async function startBluetooth() {
             ]
         });
 
-        console.log("選択したデバイス:", bluetoothDevice);
+        // 既に接続されているデバイスがあれば切断
+        if (bluetoothDevice.gatt.connected) {
+            await bluetoothDevice.gatt.disconnect();
+            console.log('以前の接続を切断しました');
+        }
 
+        // 新たに接続を試みる
         const server = await bluetoothDevice.gatt.connect();
-        console.log("GATTサーバーに接続:", server);
+        console.log('GATTサーバーに接続:', server);
 
-        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
+        // サービス取得
+        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');
         console.log("サービス取得:", service);
 
-        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');  // 角度データ用のキャラクタリスティックUUID
+        // キャラクタリスティック取得
+        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');
         console.log("キャラクタリスティック取得:", bluetoothCharacteristic);
 
-        // 通知イベントのリスンと設定
-        bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-        console.log("通知リスナーを設定");
-
-        // 通知を開始
-        const startNotificationsResponse = await bluetoothCharacteristic.startNotifications();  
-        console.log("通知開始:", startNotificationsResponse);
+        if (bluetoothCharacteristic.properties.notify) {
+            bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+            await bluetoothCharacteristic.startNotifications();
+            console.log("通知開始:");
+        } else {
+            console.error("通知がサポートされていません");
+        }
 
         console.log("Bluetooth接続成功");
 
@@ -301,7 +308,6 @@ async function startBluetooth() {
         console.error("Bluetooth接続に失敗しました", error);
     }
 }
-
 
 // 通知を受け取ったときに呼ばれる関数
 function handleCharacteristicValueChanged(event) {
