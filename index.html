@@ -1,3 +1,5 @@
+インデントとコメント文を整理してください
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -275,12 +277,6 @@ async function startBluetooth() {
             ]
         });
 
-        // 既に接続されているデバイスがあれば切断
-        if (bluetoothDevice.gatt.connected) {
-            await bluetoothDevice.gatt.disconnect();
-            console.log('以前の接続を切断しました');
-        }
-
         // 新たに接続を試みる
         const server = await bluetoothDevice.gatt.connect();
         console.log('GATTサーバーに接続:', server);
@@ -294,9 +290,9 @@ async function startBluetooth() {
         console.log("キャラクタリスティック取得:", bluetoothCharacteristic);
 
         if (bluetoothCharacteristic.properties.notify) {
-            bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-            await bluetoothCharacteristic.startNotifications();
             console.log("通知開始:");
+            await bluetoothCharacteristic.startNotifications();
+            bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
         } else {
             console.error("通知がサポートされていません");
         }
@@ -304,7 +300,7 @@ async function startBluetooth() {
         console.log("Bluetooth接続成功");
 
     } catch (error) {
-        alert("Bluetooth接続に失敗しました");
+        alert("Bluetooth接続に失敗しました: " + error.message);
         console.error("Bluetooth接続に失敗しました", error);
     }
 }
@@ -324,34 +320,6 @@ function handleCharacteristicValueChanged(event) {
 
     document.getElementById('angleDisplay').innerText = `角度: ${value}°`;
 }
-
-
-/*
-async function startBluetooth() {
-    try {
-            // acceptAllDevices: trueを指定してすべてのデバイスを表示
-            const bluetoothDevice = await navigator.bluetooth.requestDevice({
-                filters: [
-                    { name: 'ESP32_BLE_Device' },  // デバイス名でフィルタリング
-                    { services: ['12345678-1234-5678-1234-56789abcdef0'] }  // サービスUUIDでフィルタリング
-                ]
-            });
-
-        const server = await bluetoothDevice.gatt.connect();
-        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');  // 角度データ用のサービスUUID
-        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');  // 角度データ用のキャラクタリスティックUUID
-
-        bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);  // 通知イベントをリスン
-        await bluetoothCharacteristic.startNotifications();  // 通知を開始
-
-        console.log("Bluetooth接続成功");
-
-    } catch (error) {
-        alert("Bluetooth接続に失敗しました");
-        console.error("Bluetooth接続に失敗しました", error);
-    }
-}
-*/
 
 // --- Bluetoothデータの受信処理 ---
 function handleCharacteristicValueChanged(event) {
