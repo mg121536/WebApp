@@ -1,167 +1,21 @@
-インデントとコメント文を整理してください
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IPS App</title>
-    <link rel="icon" href="img/MnbIcon.png" type="image/png" sizes="180x180">
-    <link rel="apple-touch-icon" href="img/MnbIcon.png">
-
-    <style>
-        /* --- 基本のスタイル設定 --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #222;
-            color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            height: 100vh;
-        }
-
-        header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #111;
-            width: 100%;
-        }
-
-        #logo {
-            height: 50px;
-            width: auto;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: bold;
-            color: #fff;
-            margin: 0;
-        }
-
-        #canvas {
-            border: 1px solid #fff;
-            margin-top: 30px;
-            max-width: 90%;
-            height: auto;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* シャドウを追加 */
-        }
-
-        #controls {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        button {
-            background-color: #555;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            margin: 10px;
-            width: 100%; /* ボタン幅を100%にしてレスポンシブ対応 */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        button:hover {
-            background-color: #888;
-        }
-
-        button:active {
-            background-color: #444;
-        }
-
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            font-size: 12px;
-            color: #fff;
-            text-align: center;
-            padding: 5px;
-            background-color: #111;
-            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* --- スマホ向けレスポンシブデザイン --- */
-        @media (max-width: 768px) {
-            #canvas {
-                width: 100%;
-                height: 200px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            button {
-                padding: 12px;
-                font-size: 18px;
-                margin: 5px 0;
-            }
-        }
-
-        /* --- 設定モーダルのスタイル --- */
-        #settingsModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 300px;
-            height: auto;
-            background: #333;
-            border-radius: 8px;
-            z-index: 1000;
-            padding: 20px;
-            color: #fff;
-        }
-
-        .modal-content {
-            padding: 20px;
-        }
-
-        .close {
-            font-size: 24px;
-            color: #fff;
-            cursor: pointer;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        .close:hover {
-            color: red;
-        }
-
-        #settingsModal:focus {
-            outline: none;
-        }
-
-        #settingsModal:focus-visible {
-            outline: 2px solid #fff;
-        }
-    </style>
+    <link rel="icon" href="img/MnbIcon.png" type="image/png" sizes="180x180" />
+    <link rel="apple-touch-icon" href="img/MnbIcon.png" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <header>
-        <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ">
+        <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ" />
         <h1>IPSアプリケーション</h1>
     </header>
 
     <canvas id="canvas" width="800" height="400"></canvas>
+
     <div id="controls">
         <button onclick="startSerial()">シリアル通信開始</button>
         <button onclick="startBluetooth()">Bluetooth通信開始</button>
@@ -169,34 +23,34 @@
         <button onclick="openSettings()">設定</button>
     </div>
 
-    <!-- --- 設定モーダル --- -->
+    <!-- 設定モーダル -->
     <div id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
-        <div class="modal-content" onclick="event.stopPropagation();"> <!-- 親要素のクリックイベントの伝播を止める -->
+        <div class="modal-content" onclick="event.stopPropagation();">
             <span class="close" onclick="closeSettings(event)">&times;</span>
             <h2>設定</h2>
+
             <label for="product">製品:</label>
             <select id="product" onchange="updateApplication()" onclick="event.stopPropagation();">
                 <option value="IPS2550">IPS（IPS2550）</option>
                 <option value="RAA2P3500">VIR（RAA2P3500）</option>
-            </select><br><br>
-    
+            </select><br /><br />
+
             <label for="device">デバイス:</label>
             <select id="device" onclick="event.stopPropagation();">
                 <option value="iPhone">iPhone</option>
                 <option value="iPad">iPad</option>
                 <option value="Android">Android</option>
                 <option value="Windows">Windows</option>
-            </select><br><br>
-    
+            </select><br /><br />
+
             <label for="connection">接続:</label>
             <select id="connection" onclick="event.stopPropagation();">
                 <option value="wired">有線（有線）</option>
                 <option value="wifi">無線（Wi-Fi）</option>
                 <option value="bluetooth">無線（Bluetooth）</option>
-            </select><br><br>
-    
-            <button onclick="importSettings()">設定インポート</button>
-            <br><br>
+            </select><br /><br />
+
+            <button onclick="importSettings()">設定インポート</button><br /><br />
             <button onclick="closeSettings(event)">完了</button>
         </div>
     </div>
@@ -205,318 +59,6 @@
         <address>© 2000-2025 MinebeaMitsumi Inc.</address>
     </footer>
 
-    <script>
-        // --- キャンバスの設定 ---
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let maxDataPoints = 100;  // データポイント数
-        let A_vals = Array(maxDataPoints).fill(0);  // Aデータの初期化
-        let B_vals = Array(maxDataPoints).fill(0);  // Bデータの初期化
-        let xSpacing = canvas.width / maxDataPoints;  // X軸の間隔
-
-        // --- 通信関連の設定 ---
-        let serialPort = null;
-        let bluetoothDevice = null;
-        let bluetoothCharacteristic = null;
-
-        // --- 設定モーダルの表示処理 ---
-        function openSettings() {
-            document.getElementById('settingsModal').style.display = "block";
-        }
-
-        // --- 設定モーダルの閉じる処理 ---
-        function closeSettings(event) {
-            if (event) event.stopPropagation();  // イベントバブリングを防止
-            document.getElementById('settingsModal').style.display = "none";
-        }
-
-        // --- 設定インポートの処理 ---
-        function importSettings() {
-            alert('設定ファイルをインポートしました。');
-        }
-
-        // --- ウィンドウリサイズ時のキャンバスサイズ変更処理 ---
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(resizeCanvas, 100);  // 100msのディレイを設けて処理
-        });
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth * 0.9;  // ウィンドウ幅の90%に設定
-            canvas.height = window.innerHeight * 0.5;  // ウィンドウ高さの50%に設定
-            xSpacing = canvas.width / maxDataPoints;  // X軸の間隔を再計算
-        }
-
-        // --- シリアル通信の開始処理 ---
-        function startSerial() {
-            if (navigator.serial) {
-                navigator.serial.requestPort().then(port => {
-                    serialPort = port;
-                    return serialPort.open({ baudRate: 115200 });
-                }).then(() => {
-                    const reader = serialPort.readable.getReader();
-                    readLoop(reader);  // データ読み取り開始
-                }).catch(error => {
-                    alert(`シリアルポートの接続に失敗しました: ${error.message}`);
-                    console.error("シリアルポートの接続に失敗しました", error);
-                });
-            } else {
-                alert("シリアル通信はこのブラウザではサポートされていません。");
-            }
-        }
-
-// --- Bluetooth通信の開始処理 ---
-async function startBluetooth() {
-    try {
-        console.log("Bluetoothデバイスの選択を開始します...");
-        const bluetoothDevice = await navigator.bluetooth.requestDevice({
-            filters: [
-                { name: 'ESP32_BLE_Device' },  // デバイス名でフィルタリング
-                { services: ['12345678-1234-5678-1234-56789abcdef0'] }  // サービスUUIDでフィルタリング
-            ]
-        });
-
-        // 新たに接続を試みる
-        const server = await bluetoothDevice.gatt.connect();
-        console.log('GATTサーバーに接続:', server);
-
-        // サービス取得
-        const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');
-        console.log("サービス取得:", service);
-
-        // キャラクタリスティック取得
-        bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');
-        console.log("キャラクタリスティック取得:", bluetoothCharacteristic);
-
-        if (bluetoothCharacteristic.properties.notify) {
-            console.log("通知開始:");
-            await bluetoothCharacteristic.startNotifications();
-            bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-        } else {
-            console.error("通知がサポートされていません");
-        }
-
-        console.log("Bluetooth接続成功");
-
-    } catch (error) {
-        alert("Bluetooth接続に失敗しました: " + error.message);
-        console.error("Bluetooth接続に失敗しました", error);
-    }
-}
-
-// 通知を受け取ったときに呼ばれる関数
-function handleCharacteristicValueChanged(event) {
-    console.log("通知イベントが発生しました。");
-    const characteristic = event.target;
-
-    if (!characteristic.value) {
-        console.error("通知データが空です");
-        return;
-    }
-
-    const value = new TextDecoder().decode(characteristic.value);
-    console.log("受け取ったデータ:", value);
-
-    document.getElementById('angleDisplay').innerText = `角度: ${value}°`;
-}
-
-// --- Bluetoothデータの受信処理 ---
-function handleCharacteristicValueChanged(event) {
-    const value = event.target.value;
-    const angleA = value.getInt16(0, true);  // 角度Aのデータを取得
-    const angleB = value.getInt16(2, true);  // 角度Bのデータを取得
-
-    console.log("受信した角度データ A:", angleA, "B:", angleB);
-
-    updateGraph(angleA, angleB);  // グラフの更新
-}
-
-// --- グラフの更新処理 ---
-function updateGraph(A_val, B_val) {
-    A_vals.shift();
-    B_vals.shift();
-    A_vals.push(A_val);
-    B_vals.push(B_val);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#fff';
-    ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
-
-    // Y軸とX軸の目盛り描画
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, canvas.height);
-    ctx.strokeStyle = '#fff';
-    ctx.stroke();
-
-    ctx.font = '10px Arial';
-    for (let i = 0; i <= 11; i++) {
-        let yPos = (canvas.height / 11) * i;
-        let label = 1100 - (i * 100);
-        ctx.fillText(label, 5, yPos);
-    }
-
-    for (let i = 1; i <= 11; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, (canvas.height / 11) * i);
-        ctx.lineTo(canvas.width, (canvas.height / 11) * i);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.stroke();
-    }
-
-    for (let i = 0; i <= 10; i++) {
-        let xPos = (canvas.width / 10) * i;
-        ctx.fillText(i, xPos, canvas.height - 5);
-    }
-
-    for (let i = 1; i <= 10; i++) {
-        ctx.beginPath();
-        ctx.moveTo((canvas.width / 10) * i, 0);
-        ctx.lineTo((canvas.width / 10) * i, canvas.height);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.stroke();
-    }
-
-    // Aデータの描画
-    ctx.beginPath();
-    for (let i = 0; i < A_vals.length; i++) {
-        const x = i * xSpacing;
-        const y = canvas.height - (A_vals[i] / 1100) * canvas.height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'blue';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Bデータの描画
-    ctx.beginPath();
-    for (let i = 0; i < B_vals.length; i++) {
-        const x = i * xSpacing;
-        const y = canvas.height - (B_vals[i] / 1100) * canvas.height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-}
-
-        // --- シリアルデータの読み取り処理 ---
-        async function readLoop(reader) {
-            const decoder = new TextDecoder();
-            let buffer = "";
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                let newLineIndex;
-                while ((newLineIndex = buffer.indexOf('\n')) >= 0) {
-                    const line = buffer.slice(0, newLineIndex);
-                    buffer = buffer.slice(newLineIndex + 1);
-                    processData(line);  // データ処理
-                }
-            }
-        }
-
-        // --- Bluetoothデータの読み取り処理 ---
-        async function readBluetoothData() {
-            while (bluetoothCharacteristic) {
-                const value = await bluetoothCharacteristic.readValue();
-                const data = new TextDecoder().decode(value);
-                processData(data);  // データ処理
-            }
-        }
-
-        // --- データの処理とグラフの更新 ---
-        function processData(data) {
-            const match = data.match(/A:(\d+).*B:(\d+)/);
-            if (match) {
-                const A_val = parseInt(match[1]);
-                const B_val = parseInt(match[2]);
-                updateGraph(A_val, B_val);  // グラフ更新
-            } else {
-                console.warn("無効なデータ形式:", data);
-            }
-        }
-
-        // --- グラフの描画処理 ---
-        function updateGraph(A_val, B_val) {
-            A_vals.shift();
-            B_vals.shift();
-            A_vals.push(A_val);
-            B_vals.push(B_val);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面クリア
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#fff';
-            ctx.fillText('Sin ・ Cos', canvas.width / 2 - 50, 30);  // タイトル
-
-            // Y軸とX軸の目盛り描画
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height);
-            ctx.lineTo(canvas.width, canvas.height);
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, canvas.height);
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
-
-            ctx.font = '10px Arial';
-            for (let i = 0; i <= 11; i++) {
-                let yPos = (canvas.height / 11) * i;
-                let label = 1100 - (i * 100);
-                ctx.fillText(label, 5, yPos);
-            }
-
-            for (let i = 1; i <= 11; i++) {
-                ctx.beginPath();
-                ctx.moveTo(0, (canvas.height / 11) * i);
-                ctx.lineTo(canvas.width, (canvas.height / 11) * i);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.stroke();
-            }
-
-            for (let i = 0; i <= 10; i++) {
-                let xPos = (canvas.width / 10) * i;
-                ctx.fillText(i, xPos, canvas.height - 5);
-            }
-
-            for (let i = 1; i <= 10; i++) {
-                ctx.beginPath();
-                ctx.moveTo((canvas.width / 10) * i, 0);
-                ctx.lineTo((canvas.width / 10) * i, canvas.height);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.stroke();
-            }
-
-            // Aデータの描画
-            ctx.beginPath();
-            for (let i = 0; i < A_vals.length; i++) {
-                const x = i * xSpacing;
-                const y = canvas.height - (A_vals[i] / 1100) * canvas.height;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Bデータの描画
-            ctx.beginPath();
-            for (let i = 0; i < B_vals.length; i++) {
-                const x = i * xSpacing;
-                const y = canvas.height - (B_vals[i] / 1100) * canvas.height;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
