@@ -11,7 +11,7 @@ const B_vals = Array(maxDataPoints).fill(0);
 
 const Y_MIN = 0;
 const Y_MAX = 4095;
-const Y_MARGIN = 0.1; // 上下に10%の余白を追加
+const Y_MARGIN = 0.1;  // 上下に10%の余白を追加
 
 const DRAW_Y_MIN = Y_MIN - (Y_MAX * Y_MARGIN); // = -409.5
 const DRAW_Y_MAX = Y_MAX + (Y_MAX * Y_MARGIN); // = 4504.5
@@ -90,6 +90,7 @@ async function startBluetooth() {
                 { services: ['12345678-1234-5678-1234-56789abcdef0'] }
             ]
         });
+
         const server = await device.gatt.connect();
         const service = await server.getPrimaryService('12345678-1234-5678-1234-56789abcdef0');
         bluetoothCharacteristic = await service.getCharacteristic('12345678-1234-5678-1234-56789abcdef1');
@@ -106,8 +107,8 @@ async function startBluetooth() {
 
 function handleCharacteristicValueChanged(event) {
     const value = new TextDecoder().decode(event.target.value);
-    console.log("[BLE受信]", value); // 受信ログ確認用
-    processData(value.trim());       // 改行などを削除
+    console.log("[BLE受信]", value);       // 受信ログ確認用
+    processData(value.trim());            // 改行などを削除
 }
 
 //==============================================================================
@@ -246,7 +247,9 @@ function startWifi() {
     if (!ws || ws.readyState === WebSocket.CLOSED) {
         ws = new WebSocket('ws://192.168.4.1:81'); // ESP32のAPモードIP
 
-        ws.onopen = () => console.log("WebSocket connected to ESP32");
+        ws.onopen = () => {
+            console.log("WebSocket connected to ESP32");
+        };
 
         ws.onmessage = (event) => {
             console.log("ESP32から受信:", event.data);
@@ -258,5 +261,16 @@ function startWifi() {
             }
         };
 
-        ws.onerror = (error) => console.error("WebSocketエラー:", error);
-        ws.onclose = () => console.log("Web
+        ws.onerror = (error) => {
+            console.error("WebSocketエラー:", error);
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket切断");
+        };
+    } else {
+        console.log("すでにESP32と接続されています。");
+    }
+
+    resizeCanvas(); // 初期キャンバス描画
+}
