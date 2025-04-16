@@ -1,9 +1,11 @@
 //==============================================================================
 // 初期設定・グローバル変数
 //==============================================================================
+const DEBUG = true;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const ySteps = 10;
 
 const maxDataPoints = 100;
 const A_vals = Array(maxDataPoints).fill(0);
@@ -107,8 +109,52 @@ async function startBluetooth() {
 
 function handleCharacteristicValueChanged(event) {
     const value = new TextDecoder().decode(event.target.value);
-    console.log("[BLE受信]", value);       // 受信ログ確認用
-    processData(value.trim());            // 改行などを削除
+    if (DEBUG) console.log("[BLE受信]", value); // 受信ログ確認用
+    processData(value.trim());                  // 改行などを削除
+}
+
+//==============================================================================
+// Wi-Fi経由のWebSocket接続
+//==============================================================================
+
+function startWifi() {
+    if (!ws || ws.readyState === WebSocket.CLOSED) {
+        ws = new WebSocket('ws://192.168.4.1:81'); // ESP32のAPモードIP
+
+        ws.onopen = () => {
+            if (DEBUG) console.log("WebSocket connected to ESP32");
+        };
+
+        ws.onmessage = (event) => {
+            if (DEBUG) console.log("ESP32から受信:", event.data);
+            const match = event.data.match(/A[:=](\d+).*B[:=](\d+)/);
+            if (match) {
+                const A_val = parseInt(match[1]);
+                const B_val = parseInt(match[2]);
+                updateGraph(A_val, B_val);
+            }
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocketエラー:", error);
+        };
+
+        ws.onclose = () => {
+            if (DEBUG) console.log("WebSocket切断");
+        };
+    } else {
+        if (DEBUG) console.log("すでにESP32と接続されています。");
+    }
+
+    resizeCanvas(); // 初期キャンバス描画
+}
+
+//==============================================================================
+// キャリブレーション機能（仮実装）
+//==============================================================================
+
+function startCalibration() {
+    alert("キャリブレーション開始（仮機能）");
 }
 
 //==============================================================================
@@ -146,10 +192,10 @@ function updateGraph(A_val, B_val) {
     }
 
     // 水平グリッド線
-    for (let i = 1; i <= 11; i++) {
+    for (let i = 1; i <= ySteps + 1; i++) {
         ctx.beginPath();
-        ctx.moveTo(0, (canvas.height / 11) * i);
-        ctx.lineTo(canvas.width, (canvas.height / 11) * i);
+        ctx.moveTo(0, (canvas.height / ySteps + 1) * i);
+        ctx.lineTo(canvas.width, (canvas.height / ySteps + 1) * i);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.stroke();
     }
@@ -219,7 +265,7 @@ async function readLoop(reader) {
 //==============================================================================
 
 function processData(data) {
-    console.log("受信データ:", data);
+    if (DEBUG) console.log("受信データ:", data);
 
     const match = data.match(/A:(\d+).*B:(\d+)/);
     if (match) {
@@ -229,48 +275,4 @@ function processData(data) {
     } else {
         console.warn("無効なデータ形式:", data);
     }
-}
-
-//==============================================================================
-// キャリブレーション機能（仮実装）
-//==============================================================================
-
-function startCalibration() {
-    alert("キャリブレーション開始（仮機能）");
-}
-
-//==============================================================================
-// Wi-Fi経由のWebSocket接続
-//==============================================================================
-
-function startWifi() {
-    if (!ws || ws.readyState === WebSocket.CLOSED) {
-        ws = new WebSocket('ws://192.168.4.1:81'); // ESP32のAPモードIP
-
-        ws.onopen = () => {
-            console.log("WebSocket connected to ESP32");
-        };
-
-        ws.onmessage = (event) => {
-            console.log("ESP32から受信:", event.data);
-            const match = event.data.match(/A[:=](\d+).*B[:=](\d+)/);
-            if (match) {
-                const A_val = parseInt(match[1]);
-                const B_val = parseInt(match[2]);
-                updateGraph(A_val, B_val);
-            }
-        };
-
-        ws.onerror = (error) => {
-            console.error("WebSocketエラー:", error);
-        };
-
-        ws.onclose = () => {
-            console.log("WebSocket切断");
-        };
-    } else {
-        console.log("すでにESP32と接続されています。");
-    }
-
-    resizeCanvas(); // 初期キャンバス描画
 }
