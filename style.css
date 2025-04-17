@@ -52,27 +52,30 @@ h1 {
   }
   
   #topButtons button {
+    all: unset; /* すべてのブラウザデフォルトスタイルをリセット！←重要 */
+    box-sizing: border-box;
     width: 32px;
     height: 32px;
-    font-size: 16px;
+    font-size: 18px;
     background-color: #ffffffd9;
     color: #333;
     border: 1px solid #aaa;
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
-    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
+    text-align: center;
+    line-height: 1;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
   
   #topButtons button:hover {
     background-color: #f0f0f0;
     border-color: #666;
   }
+  
   
 
 /*==============================================================================
