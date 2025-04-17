@@ -192,20 +192,14 @@ footer {
   デバック
 ==============================================================================*/
 #logArea {
-    position: fixed;            /* ← 固定表示にする！重要！ */
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    z-index: 999;               /* ← 前面に出す！ロゴやキャンバスの上へ */
     padding: 10px;
-    background: rgba(255, 255, 255, 0.95); /* 半透明で見やすく */
+    margin: 20px;
+    background: #f9f9f9;
     border: 1px solid #ccc;
     font-family: monospace;
-    font-size: 13px;
-    max-height: 160px;
+    font-size: 14px;
+    max-height: 180px;
     overflow-y: auto;
     white-space: pre-wrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-  }
-  
+    color: #333;
+}

@@ -64,4 +64,3 @@ function tryGoBack() {
     window.close(); // 一部ブラウザでは動作制限あり
   }
 }
-

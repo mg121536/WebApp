@@ -112,7 +112,6 @@ function handleCharacteristicValueChanged(event) {
 // Wi-Fi経由のWebSocket接続
 // ==============================================================================
 function startWifi() {
-/*
     if (!ws || ws.readyState === WebSocket.CLOSED) {
         logMessage("WebSocket 接続を開始します...");
         ws = new WebSocket('ws://192.168.4.1:81'); // ESP32のAPモードIP
@@ -145,41 +144,6 @@ function startWifi() {
         logMessage("すでにESP32と接続されています。");
     }
 
-    resizeCanvas(); // 初期キャンバス描画
-*/
-    if (!ws || ws.readyState === WebSocket.CLOSED) {
-        logMessage("WebSocket 接続を開始します...");
-        // wss://に変更（セキュアなWebSocket接続）
-        ws = new WebSocket('wss://192.168.4.1:81'); // ESP32のAPモードIPに対してセキュアな接続を使用
-    
-        ws.onopen = () => {
-            logMessage("WebSocket 接続成功: ESP32と接続されました。");
-        };
-    
-        ws.onmessage = (event) => {
-            logMessage("ESP32から受信: " + event.data);
-            const match = event.data.match(/A[:=](\d+).*B[:=](\d+)/);
-            if (match) {
-                const A_val = parseInt(match[1]);
-                const B_val = parseInt(match[2]);
-                updateGraph(A_val, B_val);
-                logMessage(`データ更新 → A: ${A_val}, B: ${B_val}`);
-            } else {
-                logMessage("データ形式が一致しません。");
-            }
-        };
-    
-        ws.onerror = (error) => {
-            logMessage("WebSocket エラー: " + error.message);
-        };
-    
-        ws.onclose = () => {
-            logMessage("WebSocket 切断されました。");
-        };
-    } else {
-        logMessage("すでにESP32と接続されています。");
-    }
-    
     resizeCanvas(); // 初期キャンバス描画
 }
 
