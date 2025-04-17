@@ -55,3 +55,13 @@ self.addEventListener('activate', event => {
         })
     );
 });
+
+
+function tryGoBack() {
+  if (window.history.length > 1) {
+    history.back();
+  } else {
+    window.close(); // 一部ブラウザでは動作制限あり
+  }
+}
+

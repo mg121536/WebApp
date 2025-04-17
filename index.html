@@ -11,7 +11,10 @@
 </head>
 <body>
     <header>
-        <button onclick="history.back()">戻る</button>
+        <div id="topButtons">
+            <button id="backButton" onclick="tryGoBack()" title="戻る">←</button>
+            <button id="reloadButton" onclick="location.reload()" title="リロード">⟳</button>
+        </div>
         <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ" />
         <h1>IPSアプリケーション</h1>
     </header>
@@ -56,6 +59,8 @@
             <button onclick="closeSettings(event)">完了</button>
         </div>
     </section>
+
+    <section id="logArea"></section>
 
     <footer>
         <address>© 2000-2025 MinebeaMitsumi Inc.</address>

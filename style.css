@@ -40,6 +40,42 @@ h1 {
 }
 
 /*==============================================================================
+  戻るボタン
+==============================================================================*/
+#topButtons {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+  }
+  
+  #topButtons button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    background-color: #ffffffd9;
+    color: #333;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+  
+  #topButtons button:hover {
+    background-color: #f0f0f0;
+    border-color: #666;
+  }
+  
+
+/*==============================================================================
   キャンバス
 ==============================================================================*/
 #canvas {
@@ -159,3 +195,19 @@ footer {
 #settingsModal:focus-visible {
     outline: 2px solid #fff;
 }
+
+/*==============================================================================
+  デバック
+==============================================================================*/
+#logArea {
+    padding: 10px;
+    margin: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    font-size: 14px;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: #333;
+  }

@@ -113,31 +113,35 @@ function handleCharacteristicValueChanged(event) {
 // ==============================================================================
 function startWifi() {
     if (!ws || ws.readyState === WebSocket.CLOSED) {
+        logMessage("WebSocket 接続を開始します...");
         ws = new WebSocket('ws://192.168.4.1:81'); // ESP32のAPモードIP
 
         ws.onopen = () => {
-            if (DEBUG) console.log("WebSocket connected to ESP32");
+            logMessage("WebSocket 接続成功: ESP32と接続されました。");
         };
 
         ws.onmessage = (event) => {
-            if (DEBUG) console.log("ESP32から受信:", event.data);
+            logMessage("ESP32から受信: " + event.data);
             const match = event.data.match(/A[:=](\d+).*B[:=](\d+)/);
             if (match) {
                 const A_val = parseInt(match[1]);
                 const B_val = parseInt(match[2]);
                 updateGraph(A_val, B_val);
+                logMessage(`データ更新 → A: ${A_val}, B: ${B_val}`);
+            } else {
+                logMessage("データ形式が一致しません。");
             }
         };
 
         ws.onerror = (error) => {
-            console.error("WebSocketエラー:", error);
+            logMessage("WebSocket エラー: " + error.message);
         };
 
         ws.onclose = () => {
-            if (DEBUG) console.log("WebSocket切断");
+            logMessage("WebSocket 切断されました。");
         };
     } else {
-        if (DEBUG) console.log("すでにESP32と接続されています。");
+        logMessage("すでにESP32と接続されています。");
     }
 
     resizeCanvas(); // 初期キャンバス描画
@@ -264,5 +268,32 @@ function processData(data) {
         updateGraph(A_val, B_val);
     } else {
         console.warn("無効なデータ形式:", data);
+    }
+}
+
+// ==============================================================================
+// デバック
+// ==============================================================================
+function tryGoBack() {
+    if (window.history.length > 1) {
+      history.back();
+    } else {
+      window.close(); // 一部ブラウザでは動作制限あり
+    }
+  }
+
+// ==============================================================================
+// デバック
+// ==============================================================================
+function logMessage(message) {
+    const logArea = document.getElementById('logArea');
+    const time = new Date().toLocaleTimeString();
+    const fullMessage = `[${time}] ${message}`;
+
+    if (DEBUG) console.log(fullMessage);
+
+    if (logArea) {
+        logArea.textContent += fullMessage + '\n';
+        logArea.scrollTop = logArea.scrollHeight;
     }
 }
