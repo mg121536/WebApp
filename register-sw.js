@@ -1,8 +1,14 @@
-// register-sw.js
+// ==============================================================================
+// Service Worker 登録処理
+// ==============================================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('Service Worker registered:', reg))
-      .catch(err => console.log('Service Worker registration failed:', err));
+      navigator.serviceWorker.register('service-worker.js')
+          .then(reg => {
+              console.log('Service Worker registered:', reg);
+          })
+          .catch(err => {
+              console.log('Service Worker registration failed:', err);
+          });
   });
 }

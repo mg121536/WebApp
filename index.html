@@ -11,6 +11,7 @@
 </head>
 <body>
     <header>
+        <button onclick="history.back()">戻る</button>
         <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ" />
         <h1>IPSアプリケーション</h1>
     </header>
@@ -23,7 +24,7 @@
         <button onclick="startWifi()">Wi-Fi通信開始</button>
         <button onclick="startCalibration()">キャリブレーション</button>
         <button onclick="openSettings()">設定</button>
-    </div>
+    </section>
 
     <!-- 設定モーダル -->
     <section id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
@@ -54,7 +55,7 @@
             <button onclick="importSettings()">設定インポート</button><br /><br />
             <button onclick="closeSettings(event)">完了</button>
         </div>
-    </div>
+    </section>
 
     <footer>
         <address>© 2000-2025 MinebeaMitsumi Inc.</address>
