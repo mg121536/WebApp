@@ -4,69 +4,98 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IPS App</title>
+
+    <!-- フォントの読み込みとスタイル -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+    </style>
+
+    <!-- ファビコンとアイコン -->
     <link rel="icon" href="img/MnbIcon.png" type="image/png" sizes="180x180" />
     <link rel="apple-touch-icon" href="img/MnbIcon.png" />
+
+    <!-- スタイルシートとマニフェスト -->
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
+
+    <script>
+        if (location.pathname !== '/' && location.pathname.startsWith('/index')) {
+          location.replace('/');
+        }
+    </script>
 </head>
 <body>
+    <!-- ここから先は元の内容と同じ -->
     <div id="topButtons">
         <button id="backButton" onclick="tryGoBack()" title="戻る">←</button>
         <button id="reloadButton" onclick="location.reload()" title="リロード">⟳</button>
     </div>
+
     <header>
         <img id="logo" src="img/MnbHeader.png" alt="MinebeaMitsumiのロゴ" />
         <h1>IPSアプリケーション</h1>
+        <div id="graphOptions">
+            <label><input type="checkbox" id="sinCheckbox" checked onchange="toggleGraph()"> Sin</label>
+            <label><input type="checkbox" id="cosCheckbox" checked onchange="toggleGraph()"> Cos</label>
+            <label><input type="checkbox" id="sinNCheckbox" checked onchange="toggleGraph()"> SinN</label>
+            <label><input type="checkbox" id="cosNCheckbox" checked onchange="toggleGraph()"> CosN</label>
+        </div>
     </header>
 
-    <canvas id="canvas" width="800" height="400"></canvas>
+        <canvas id="canvas" width="800" height="400"></canvas>
 
     <section id="controls">
-        <button onclick="startSerial()">シリアル通信開始</button>
-        <button onclick="startBluetooth()">Bluetooth通信開始</button>
-        <button onclick="startWifi()">Wi-Fi通信開始</button>
+        <button onclick="window.startWifi()">通信開始</button>
         <button onclick="startCalibration()">キャリブレーション</button>
-        <button onclick="openSettings()">設定</button>
+        <button onclick="window.openSettings()">設定</button>
     </section>
 
-    <!-- 設定モーダル -->
     <section id="settingsModal" class="modal" tabindex="-1" onclick="closeSettings(event)">
         <div class="modal-content" onclick="event.stopPropagation();">
             <span class="close" onclick="closeSettings(event)">&times;</span>
             <h2>設定</h2>
-
             <label for="product">製品:</label>
             <select id="product" onchange="updateApplication()" onclick="event.stopPropagation();">
                 <option value="IPS2550">IPS（IPS2550）</option>
                 <option value="RAA2P3500">VIR（RAA2P3500）</option>
-            </select><br /><br />
-
+            </select>
+            <br /><br />
             <label for="device">デバイス:</label>
             <select id="device" onclick="event.stopPropagation();">
                 <option value="iPhone">iPad/iPhone</option>
                 <option value="Android">Android</option>
                 <option value="Windows">Windows</option>
-            </select><br /><br />
-
+            </select>
+            <br /><br />
             <label for="connection">接続:</label>
             <select id="connection" onclick="event.stopPropagation();">
                 <option value="wifi">無線（Wi-Fi）</option>
-                <option value="bluetooth">無線（Bluetooth）</option>
-                <option value="wired">有線（有線）</option>
-            </select><br /><br />
-
-            <button onclick="importSettings()">設定インポート</button><br /><br />
+                <option value="wired">有線（USB）</option>
+            </select>
+            <br /><br />
+            <button onclick="importSettings()">設定インポート</button>
+            <br /><br />
             <button onclick="closeSettings(event)">完了</button>
         </div>
     </section>
-
-    <section id="logArea"></section>
 
     <footer>
         <address>© 2000-2025 MinebeaMitsumi Inc.</address>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- スクリプト読み込み -->
+    <script src="init.js"></script>
+    <script src="utils.js"></script>
+    <script src="settings.js"></script>
+    <script src="resize.js"></script>
+    <script src="graph.js"></script>
+    <script src="parser.js"></script>
+    <script src="serial.js"></script>
+    <script src="websocket.js"></script>
     <script src="register-sw.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

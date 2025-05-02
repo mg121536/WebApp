@@ -1,10 +1,10 @@
 {
   "name": "IPSアプリケーション",
   "short_name": "IPS App",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "fullscreen",
   "background_color": "#ffffff",
-  "theme_color": "#0078D7",
+  "theme_color": "#121212",
   "icons": [
     {
       "src": "img/MnbIcon.png",

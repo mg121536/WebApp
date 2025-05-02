@@ -1,7 +1,8 @@
-/*==============================================================================
-  ベース設定
-==============================================================================*/
-body {
+@media (prefers-color-scheme: dark) {
+  /*==============================================================================
+    ベース設定
+  ==============================================================================*/
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #222;
     color: #f0f0f0;
@@ -12,50 +13,45 @@ body {
     align-items: center;
     justify-content: flex-start;
     height: 100vh;
-}
+  }
 
-/*==============================================================================
-  ヘッダー
-==============================================================================*/
-header {
+  header {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     background-color: #111;
     width: 100%;
-}
+  }
 
-#logo {
+  #logo {
     height: 50px;
     width: auto;
     margin-bottom: 10px;
-}
+  }
 
-h1 {
+  h1 {
     font-size: 24px;
     font-weight: bold;
     color: #fff;
     margin: 0;
-}
+  }
 
-/*==============================================================================
-  戻るボタン
-==============================================================================*/
-#topButtons {
+  #topButtons {
     position: fixed;
     top: 10px;
     left: 10px;
     display: flex;
     gap: 8px;
-    z-index: 1000; /* ロゴより前面に表示 */
+    align-items: center;
+    z-index: 1000;
   }
-  
+
   #topButtons button {
     all: unset;
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
     background-color: #ffffffdd;
     border: 1px solid #aaa;
     border-radius: 50%;
@@ -67,26 +63,58 @@ h1 {
     transition: 0.2s ease;
   }
 
-/*==============================================================================
-  キャンバス
-==============================================================================*/
-#canvas {
+  #topButtons button:hover {
+    background-color: #ffffffdd;
+  }
+
+  #topButtons button:active {
+    background-color: #ccc;
+  }
+
+  #settingsPanel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    color: white;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+  }
+
+  #graphOptions {
+    position: static;
+    margin-top: 10px;
+    font-size: 14px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 8px 12px;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #graphOptions label {
+    margin-right: 10px;
+  }
+
+  #canvas {
     border: 1px solid #fff;
     margin-top: 30px;
     max-width: 90%;
     height: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+  }
 
-/*==============================================================================
-  コントロール（ボタン類）
-==============================================================================*/
-#controls {
+  #controls {
     margin-top: 20px;
     text-align: center;
-}
+  }
 
-button {
+  button {
     background-color: #555;
     color: #fff;
     border: none;
@@ -98,20 +126,17 @@ button {
     margin: 10px;
     width: 100%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+  }
 
-button:hover {
+  button:hover {
     background-color: #888;
-}
+  }
 
-button:active {
+  button:active {
     background-color: #444;
-}
+  }
 
-/*==============================================================================
-  フッター
-==============================================================================*/
-footer {
+  footer {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -122,32 +147,26 @@ footer {
     padding: 5px;
     background-color: #111;
     box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-}
+  }
 
-/*==============================================================================
-  レスポンシブ対応（768px以下）
-==============================================================================*/
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
     #canvas {
-        width: 100%;
-        height: 200px;
+      width: 100%;
+      height: 200px;
     }
 
     h1 {
-        font-size: 20px;
+      font-size: 20px;
     }
 
     button {
-        padding: 12px;
-        font-size: 18px;
-        margin: 5px 0;
+      padding: 12px;
+      font-size: 18px;
+      margin: 5px 0;
     }
-}
+  }
 
-/*==============================================================================
-  モーダル設定
-==============================================================================*/
-#settingsModal {
+  #settingsModal {
     display: none;
     position: fixed;
     top: 50%;
@@ -161,45 +180,30 @@ footer {
     z-index: 1000;
     padding: 20px;
     color: #fff;
-}
+  }
 
-.modal-content {
+  .modal-content {
     padding: 20px;
-}
+  }
 
-.close {
+  .close {
     font-size: 24px;
     color: #fff;
     cursor: pointer;
     position: absolute;
     top: 10px;
     right: 10px;
-}
+  }
 
-.close:hover {
+  .close:hover {
     color: red;
-}
+  }
 
-#settingsModal:focus {
+  #settingsModal:focus {
     outline: none;
-}
+  }
 
-#settingsModal:focus-visible {
+  #settingsModal:focus-visible {
     outline: 2px solid #fff;
-}
-
-/*==============================================================================
-  デバック
-==============================================================================*/
-#logArea {
-    padding: 10px;
-    margin: 20px;
-    background: #f9f9f9;
-    border: 1px solid #ccc;
-    font-family: monospace;
-    font-size: 14px;
-    max-height: 180px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    color: #333;
+  }
 }
